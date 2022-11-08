@@ -102,12 +102,59 @@ func AuthCheck(w http.ResponseWriter, _ *http.Request) {
 
 }
 
-func Login(w http.ResponseWriter, _ *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
 	// получить данные
 	// сохранить/раскодировать данные
 	// проверить наличие юзера
 	// если он есть - сверить хэши паролей
 	// Если нет - вернуть ошибку
+
+	reqBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("BAD REQUEST"))
+	}
+
+	var data UserLogin
+	err = json.Unmarshal(reqBody, &data)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("BAD REQUEST"))
+	}
+
+	db, err := sql.Open("sqlite3", "db.sql")
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("INTERNAL DATABASE ERROR"))
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id FROM admins WHERE username = ?", data.Username)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("INTERNAL DATABASE ERROR"))
+	}
+
+	if rows.Next() {
+		fmt.Println("User already exists")
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte("USER EXISTS"))
+	} else {
+
+		hash := md5.Sum([]byte(data.Password))
+		hashString := hex.EncodeToString(hash[:])
+
+		_, err = db.Exec("INSERT INTO admins (username, password) VALUES (?, ?)", data.Username, hashString)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("INTERNAL DATABASE ERROR"))
+		}
+	}
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
