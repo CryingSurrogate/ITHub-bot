@@ -102,58 +102,50 @@ func AuthCheck(w http.ResponseWriter, _ *http.Request) {
 
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	// получить данные
-	// сохранить/раскодировать данные
-	// проверить наличие юзера
-	// если он есть - сверить хэши паролей
-	// Если нет - вернуть ошибку
-
+func Login(w http.ResponseWriter, r *http.Request) { // Тимонин Игоръ
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("BAD REQUEST"))
+		return
 	}
-
 	var data UserLogin
 	err = json.Unmarshal(reqBody, &data)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("BAD REQUEST"))
+		return
 	}
-
-	db, err := sql.Open("sqlite3", "db.sql")
+	// if data.Password != "" &&
+	db, err := sql.Open("sqlite3", "file:db.sql")
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("INTERNAL DATABASE ERROR"))
+		return
 	}
 	defer db.Close()
-
-	rows, err := db.Query("SELECT id FROM admins WHERE username = ?", data.Username)
+	var dbHashedPass string
+	err = db.QueryRow("SELECT password FROM admins WHERE username = ?", data.Username).Scan(&dbHashedPass)
 	if err != nil {
 		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("INTERNAL DATABASE ERROR"))
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("USER NOT FOUND"))
+		return
 	}
-
-	if rows.Next() {
-		fmt.Println("User already exists")
-		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte("USER EXISTS"))
+	hash := md5.Sum([]byte(data.Password))
+	hashString := hex.EncodeToString(hash[:])
+	if dbHashedPass == hashString {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("SUCCESSFUL LOGIN"))
+		return
 	} else {
-
-		hash := md5.Sum([]byte(data.Password))
-		hashString := hex.EncodeToString(hash[:])
-
-		_, err = db.Exec("INSERT INTO admins (username, password) VALUES (?, ?)", data.Username, hashString)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("INTERNAL DATABASE ERROR"))
-		}
+		fmt.Println(err)
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte("INCORRECT PASSWORD"))
+		return
 	}
 }
 
