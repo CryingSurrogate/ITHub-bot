@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+
+<body>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #text {
+      margin: 1rem 0;
+      height: auto;
+      text-overflow: auto;
+    }
+
+    .box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 25px;
+      font-family: sans-serif;
+      background-color: indianred;
+      height: 100vh;
+    }
+
+    form {
+      background-color: rgb(255, 236, 236);
+      width: 40%;
+      height: 40%;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      width: 5rem;
+    }
+  </style>
+  </head>
+
+  <body>
+    <div class="box">
+      <form>
+        <div>
+          <label for="text">Enter Something</label><br />
+          <input type="text" name="text" id="username" placeholder="username"><br />
+          <input type="password" name="pass" id="pass" placeholder="password"><br />
+          <input type="submit" value="Login" class="btn">
+          <input type="submit" value="Register" class="btn" onclick="register()">
+        </div>
+      </form>
+    </div>
+    <script>
+      function login() {
+        let userData = {
+          username: document.getElementById("username"),
+          password: document.getElementById("pass")
+        }
+        json = JSON.stringify(userData)
+
+        xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '/login')
+        xhr.setRequestHeader("content-type", "application/json")
+
+        xhr.send(json)
+      }
+      function register() {
+        let userData = {
+          username: document.getElementById("username"),
+          password: document.getElementById("pass")
+        }
+        json = JSON.stringify(userData)
+
+        xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '/register')
+        xhr.setRequestHeader("content-type", "application/json")
+
+        xhr.send(json)
+      }
+
+      let form = document.forms[0];
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let text = e.target.text.value;
+        if (text != "") {
+          alert("Thank you!")
+        } else {
+          alert("Please enter something!")
+        }
+      })
+    </script>
+  </body>
+
+</html>

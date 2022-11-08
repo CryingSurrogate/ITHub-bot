@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+</head>
+<body>
+    <textarea id="output" cols="32" rows="7"></textarea><br/>
+    <button id="name", type="button", onclick="getName()">Bot's current name</button>
+    <button id="eventId", onclick="getEventId()">Get current event Id</button><br/>
+    <button id="lastId", onclick="getLastId()">Get current last Id</button>
+    <button id="clearer", onclick="clearArea()">Clear area</button>
+    <script>
+        function getName() {
+            fetch('/botName').then(response => { return response.text() })
+                            .then(gotText => { document.getElementById("output").textContent += gotText + "\n" })
+        }
+
+        function getEventId() {
+            fetch('/eventId').then(response => { return response.text() })
+                            .then(gotText => { document.getElementById("output").textContent += gotText + "\n" })
+        }
+
+        function getLastId() {
+            fetch('/lastId').then(response => { return response.text() })
+                            .then(gotText => { document.getElementById("output").textContent += gotText + "\n" })
+        }
+
+        function clearArea() {
+            document.getElementById("output").textContent = ""
+        }
+    </script>
+</body>
+</html>
