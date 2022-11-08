@@ -17,7 +17,7 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-const apiUrl = "https://api.telegram.org/" + "bot5593551307:AAH4knPtYPOsgu9SkvEXmJ5C4UoeifqY6Io"
+const apiUrl = "https://api.telegram.org/" + "bot***"
 
 func main() {
 	sql.Register("sqlite3_with_extensions",
