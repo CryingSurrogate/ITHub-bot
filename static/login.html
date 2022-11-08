@@ -61,8 +61,8 @@
     <script>
       function login() {
         let userData = {
-          username: document.getElementById("username"),
-          password: document.getElementById("pass")
+          username: document.getElementById("username").value,
+          password: document.getElementById("pass").value
         }
         json = JSON.stringify(userData)
 
@@ -75,8 +75,8 @@
       }
       function register() {
         let userData = {
-          username: document.getElementById("username"),
-          password: document.getElementById("pass")
+          username: document.getElementById("username").value,
+          password: document.getElementById("pass").value
         }
         json = JSON.stringify(userData)
 
