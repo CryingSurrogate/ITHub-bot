@@ -14,18 +14,19 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
-const apiUrl = "https://api.telegram.org/" + "bot***"
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "password"
+	dbname   = "postgres"
+	apiUrl   = "https://api.telegram.org/" + "bot***"
+)
 
 func main() {
-	sql.Register("sqlite3_with_extensions",
-		&sqlite3.SQLiteDriver{
-			Extensions: []string{
-				"sqlite3_mod_regexp",
-			},
-		})
 
 	go UpdateLoop()
 	router := mux.NewRouter()
@@ -63,14 +64,12 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NameHandler(w http.ResponseWriter, _ *http.Request) {
-	db, err := sql.Open("sqlite3", "db.sql")
-	if err != nil {
-		panic(err)
-	}
+	db := connectDb()
 	defer db.Close()
+
 	var gotname string
 	var resp sql.NullString // для результата
-	err = db.QueryRow("SELECT name FROM bot_status").Scan(&resp)
+	err := db.QueryRow("SELECT name FROM bot_status").Scan(&resp)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -81,7 +80,7 @@ func NameHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func EvIdHandler(w http.ResponseWriter, _ *http.Request) {
-	// db, err := sql.Open("sqlite3", "db.sql")
+	// db := connectDb()
 	// if err != nil {
 	//     panic(err)
 	// }
@@ -165,7 +164,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("BAD REQUEST"))
 	}
 
-	db, err := sql.Open("sqlite3", "db.sql")
+	db := connectDb()
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -200,14 +199,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func LastIdHandler(w http.ResponseWriter, _ *http.Request) {
-	db, err := sql.Open("sqlite3", "db.sql")
-	if err != nil {
-		panic(err)
-	}
+	db := connectDb()
+
 	defer db.Close()
 	var gotlastid string
 	var resp sql.NullString // для результата
-	err = db.QueryRow("SELECT lastid FROM bot_status").Scan(&resp)
+	err := db.QueryRow("SELECT lastid FROM bot_status").Scan(&resp)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -218,14 +215,12 @@ func LastIdHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func UpdateLoop() {
-	db, err := sql.Open("sqlite3", "db.sql")
-	if err != nil {
-		panic(err)
-	}
+	db := connectDb()
+
 	defer db.Close()
 	lastId := 0
 	var nickname1 string
-	err = db.QueryRow(`select name from bot_status`).Scan(&nickname1)
+	err := db.QueryRow(`select name from bot_status`).Scan(&nickname1)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -320,10 +315,8 @@ func ChangeName(lastId int, ev UpdateStruct, txt string, nickname *string) int {
 	new := strings.Split(txt, "измени обращение на: ")
 	*nickname = new[1]
 
-	db, err := sql.Open("sqlite3", "db.sql")
-	if err != nil {
-		panic(err)
-	}
+	db := connectDb()
+
 	defer db.Close()
 	result, err := db.Exec(`update bot_status set name = $1`, *nickname)
 	if err != nil {
@@ -378,4 +371,16 @@ func Haha(lastId int, ev UpdateStruct) int {
 	} else {
 		return ev.Id + 1
 	}
+}
+
+func connectDb() *sql.DB {
+	connstr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	conn, err := sql.Open("postgres", connstr)
+	if err != nil {
+		panic(err)
+	}
+	if conn == nil {
+		panic("db nil")
+	}
+	return conn
 }
