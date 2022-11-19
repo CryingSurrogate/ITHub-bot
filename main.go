@@ -26,9 +26,14 @@ const (
 	apiUrl   = "https://api.telegram.org/" + "bot***"
 )
 
+var idcache map[int]ChatInfo = make(map[int]ChatInfo)
+
 func main() {
 
+	initCache()
+
 	go UpdateLoop()
+	go initiateNats()
 	router := mux.NewRouter()
 	router.HandleFunc("/api", IndexHandler)
 	router.HandleFunc("/botName", NameHandler)
@@ -250,6 +255,10 @@ func Update(lastId int, nickname *string) int {
 	if len(v.Result) > 0 {
 		ev := v.Result[len(v.Result)-1]
 		txt := ev.Message.Text
+		// catalog
+		if !checkCache(ev.Message.Chat.Id) {
+			addToCache(ev.Message.Chat.Id)
+		}
 
 		if strings.ToLower(txt) == "как тебя зовут?" {
 			return WAY(lastId, ev, nickname)
