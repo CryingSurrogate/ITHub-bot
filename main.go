@@ -33,7 +33,7 @@ func main() {
 	initCache()
 
 	go UpdateLoop()
-	go initiateNats()
+	initiateNats()
 	router := mux.NewRouter()
 	router.HandleFunc("/api", IndexHandler)
 	router.HandleFunc("/botName", NameHandler)
