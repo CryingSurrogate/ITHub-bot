@@ -34,6 +34,7 @@ func main() {
 
 	go UpdateLoop()
 	initiateNats()
+	go cronProcess()
 	router := mux.NewRouter()
 	router.HandleFunc("/api", IndexHandler)
 	router.HandleFunc("/botName", NameHandler)
