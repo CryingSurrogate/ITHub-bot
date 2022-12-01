@@ -42,6 +42,7 @@ func main() {
 	router.HandleFunc("/lastId", LastIdHandler)
 	router.HandleFunc("/login", Login)
 	router.HandleFunc("/register", Register)
+	router.HandleFunc("/postAd", PostAdHandler)
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	http.ListenAndServe("localhost:8080", router)
 }

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+</head>
+<body>
+    <textarea id="msgText" cols="32" rows="7"></textarea><br/>
+    <input type="datetime-local" id="post-time"
+    name="post-time" value="2018-06-12T19:30"
+    min="2018-06-07T00:00"><br/>
+    <button id="name", type="button", onclick="getName()">Bot's current name</button>
+    <button id="eventId", onclick="getEventId()">Get current event Id</button><br/>
+    <button id="lastId", onclick="getLastId()">Get current last Id</button>
+    <button id="clearer", onclick="clearArea()">Clear area</button>
+    <script>
+      
+      current = new Date(Date.now());
+
+      document.getElementById("post-time").value = current.toISOString();
+      document.getElementById("post-time").min = current.toISOString();
+
+      function sendAd() {
+        timestamp = new Date(document.getElementById("post-time").value)
+        let adData = {
+          msg: document.getElementById("msgText").value,
+          time: Math.floor(timestamp.getTime()/1000)
+        }
+        json = JSON.stringify(adData)
+
+        xhr = new XMLHttpRequest();
+
+        xhr.open('POST', '/postAd')
+        xhr.setRequestHeader("content-type", "application/json")
+
+        xhr.send(json)
+
+        clearArea()
+      }
+
+        function clearArea() {
+            document.getElementById("msgText").textContent = ""
+        }
+    </script>
+</body>
+</html>
