@@ -17,9 +17,11 @@
     <script>
       
       current = new Date(Date.now());
+      currTextTime = current.toISOString();
+      currTextTime = currTextTime.Split(':').pop();
 
-      document.getElementById("post-time").value = current.toISOString();
-      document.getElementById("post-time").min = current.toISOString();
+      document.getElementById("post-time").value = currTextTime
+      document.getElementById("post-time").min = currTextTime
 
       function sendAd() {
         timestamp = new Date(document.getElementById("post-time").value)
