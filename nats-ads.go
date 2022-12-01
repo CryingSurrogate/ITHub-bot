@@ -61,6 +61,12 @@ func PostAdHandler(w http.ResponseWriter, r *http.Request) {
 	defer nc.Drain()
 
 	outData, err := json.Marshal(inData)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("SERVER ERROR"))
+		return
+	}
 
 	nc.Publish("ith.bot.ads", outData)
 
